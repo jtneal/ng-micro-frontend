@@ -8,6 +8,12 @@
     "declaration": false,
     "downlevelIteration": true,
     "experimentalDecorators": true,
+    "paths": {
+      "library": [
+        "dist/library/library",
+        "dist/library"
+      ]
+    },
     "moduleResolution": "node",
     "importHelpers": true,
     "target": "es2015",
