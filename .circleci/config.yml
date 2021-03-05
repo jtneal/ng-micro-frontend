@@ -44,7 +44,7 @@ workflows:
           requires:
             - unit-test
       - publish:
-          context: 'prod-jneal-ecs'
+          context: 'prod-jneal-npm'
           requires:
             - lint
             - e2e-test
