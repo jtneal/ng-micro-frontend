@@ -2,6 +2,7 @@
 // Protractor configuration file, see link for more information
 // https://github.com/angular/protractor/blob/master/lib/config.ts
 
+const { JUnitXmlReporter } = require('jasmine-reporters');
 const { SpecReporter, StacktraceOption } = require('jasmine-spec-reporter');
 
 /**
@@ -32,6 +33,11 @@ exports.config = {
       spec: {
         displayStacktrace: StacktraceOption.PRETTY
       }
+    }));
+    jasmine.getEnv().addReporter(new JUnitXmlReporter({
+      consolidateAll: true,
+      savePath: 'test-results/protractor',
+      filePrefix: 'results'
     }));
   }
 };
