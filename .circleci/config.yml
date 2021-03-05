@@ -169,6 +169,7 @@ jobs:
   publish:
     executor: node-executor
     steps:
+      - attach-workspace-step
       - run:
           name: 'Build'
           command: 'npm run build -- --prod'
