@@ -30,19 +30,34 @@ workflows:
   version: 2.1
   pipeline:
     jobs:
-      - install
+      - install:
+          filters:
+            tags:
+              only: /^v.*/
       - lint:
           requires:
             - install
+          filters:
+            tags:
+              only: /^v.*/
       - unit-test:
           requires:
             - install
+          filters:
+            tags:
+              only: /^v.*/
       - e2e-test:
           requires:
             - install
+          filters:
+            tags:
+              only: /^v.*/
       - sonar-scanner:
           requires:
             - unit-test
+          filters:
+            tags:
+              only: /^v.*/
       - publish:
           context: 'prod-jneal-npm'
           requires:
