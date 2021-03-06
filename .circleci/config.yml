@@ -179,6 +179,11 @@ jobs:
           command: 'npm version $CIRCLE_TAG'
       - run:
           working_directory: ./dist/library
+          name: 'Include README'
+          command: 'cp ../../README.md .'
+          
+      - run:
+          working_directory: ./dist/library
           name: 'Authenticate'
           command: 'npm set //registry.npmjs.org/:_authToken $NPM_TOKEN'
       - run:

@@ -8,7 +8,7 @@ import { Manifest } from './manifest';
 
 @Injectable({ providedIn: 'root' })
 export class MicroFrontendService {
-  private readonly loaded: { [key: string]: Manifest } = {};
+  private readonly loaded: { [key: string]: Manifest } = { };
 
   public constructor(
     @Inject(DOCUMENT) private readonly document: any,

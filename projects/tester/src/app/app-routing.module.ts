@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
-import { MicroFrontendComponent } from 'projects/library/src/public-api';
+import { RouteFactory } from 'projects/library/src/public-api';
 
 const routes: Routes = [
   {
@@ -9,27 +9,9 @@ const routes: Routes = [
     pathMatch: 'full',
     redirectTo: 'home',
   },
-  {
-    component: MicroFrontendComponent,
-    data: {
-      baseUrl: '/assets/examples/home',
-    },
-    path: 'home',
-  },
-  {
-    component: MicroFrontendComponent,
-    data: {
-      baseUrl: '/assets/examples/about',
-    },
-    path: 'about',
-  },
-  {
-    component: MicroFrontendComponent,
-    data: {
-      baseUrl: '/assets/examples/contact',
-    },
-    path: 'contact',
-  },
+  RouteFactory.createRoute('home', '/assets/examples/home'),
+  RouteFactory.createRoute('about', '/assets/examples/about'),
+  RouteFactory.createRoute('contact', '/assets/examples/contact'),
 ];
 
 @NgModule({
