@@ -25,6 +25,8 @@ Using npm:
 npm install ng-micro-frontend
 ```
 
+Now you can import the `MicroFrontendModule` into your AppModule.
+
 ## Getting Started
 
 This package only helps you setup your shell or container application that wraps your micro frontend custom elements. These custom elements can be built using Angular Elements or any other method you prefer.
@@ -52,16 +54,10 @@ Once your custom element's manifest.json file is available, you're ready to rout
 ```typescript
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { MicroFrontendComponent } from 'ng-micro-frontend';
+import { MicroFrontendComponent, RouteFactory } from 'ng-micro-frontend';
 
 const routes: Routes = [
-  {
-    component: MicroFrontendComponent,
-    data: {
-      baseUrl: 'https://example.cdn/home',
-    },
-    path: 'home',
-  },
+  RouteFactory.createRoute('home', 'https://example.cdn/home'),
 ];
 
 @NgModule({
