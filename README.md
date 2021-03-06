@@ -54,7 +54,7 @@ Once your custom element's manifest.json file is available, you're ready to rout
 ```typescript
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { MicroFrontendComponent, RouteFactory } from 'ng-micro-frontend';
+import { RouteFactory } from 'ng-micro-frontend';
 
 const routes: Routes = [
   RouteFactory.createRoute('home', 'https://example.cdn/home'),

@@ -3,10 +3,17 @@ import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 
 import { MicroFrontendComponent } from './micro-frontend.component';
+import { NullComponent } from './null.component';
 
 @NgModule({
-  declarations: [MicroFrontendComponent],
-  exports: [MicroFrontendComponent],
+  declarations: [
+    MicroFrontendComponent,
+    NullComponent,
+  ],
+  exports: [
+    MicroFrontendComponent,
+    NullComponent,
+  ],
   imports: [
     CommonModule,
     HttpClientModule,
