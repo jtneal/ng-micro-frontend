@@ -1,11 +1,36 @@
 {
   "name": "ng-micro-frontend",
-  "version": "0.0.1",
+  "version": "0.0.0",
+  "license": "MIT",
+  "repository": {
+    "type": "GitHub",
+    "url": "https://github.com/jtneal/ng-module-federation"
+  },
+  "author": {
+    "name": "Jason Neal",
+    "email": "jason@jneal.com",
+    "url": "https://jneal.com"
+  },
+  "scripts": {
+    "build": "../../node_modules/.bin/tsc -p tsconfig.schematics.json",
+    "copy:schemas": "cp schematics/ng-add/schema.json ../../dist/library/schematics/ng-add/schema.json",
+    "copy:files": "cp -R schematics/ng-add/files ../../dist/library/schematics/ng-add",
+    "copy:collection": "cp schematics/collection.json ../../dist/library/schematics/collection.json",
+    "postbuild": "npm run copy:schemas && npm run copy:files && npm run copy:collection"
+  },
   "peerDependencies": {
     "@angular/common": "^11.2.4",
     "@angular/core": "^11.2.4"
   },
   "dependencies": {
-    "tslib": "^2.0.0"
+    "@angular/elements": "^11.2.4",
+    "ngx-build-plus": "^11.0.0",
+    "npm-run-all": "^4.1.5",
+    "tslib": "^2.0.0",
+    "webpack-manifest-plugin": "^3.0.0"
+  },
+  "schematics": "./schematics/collection.json",
+  "ng-add": {
+    "save": "dependencies"
   }
 }

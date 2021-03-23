@@ -88,13 +88,13 @@ jobs:
             fi
       - restore_cache:
           keys:
-            - node-dependencies-{{ checksum "package-lock.json" }}
+            - node-dependencies-{{ checksum "yarn.lock" }}
             - node-dependencies-
       - run:
           environment:
             NG_CLI_ANALYTICS: ci
           name: Restore packages
-          command: npm install
+          command: yarn
       - run:
           name: Disable Analytics
           command: npx ng analytics off
@@ -102,7 +102,7 @@ jobs:
           name: Precompile Angular libraries
           command: npx ngcc
       - save_cache:
-          key: node-dependencies-{{ checksum "package-lock.json" }}
+          key: node-dependencies-{{ checksum "yarn.lock" }}
           paths:
             - node_modules
       - persist-workspace-step

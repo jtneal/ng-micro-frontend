@@ -1,0 +1,11 @@
+{
+  "$schema": "../../../node_modules/@angular-devkit/schematics/collection-schema.json",
+  "schematics": {
+    "ng-add": {
+      "description": "Adds ng-micro-frontend to the project and configures Angular Elements.",
+      "factory": "./ng-add/index#ngAdd",
+      "schema": "./ng-add/schema.json",
+      "aliases": ["install"]
+    }
+  }
+}

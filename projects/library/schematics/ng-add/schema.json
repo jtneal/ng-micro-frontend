@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "id": "ng-micro-frontend-ng-add",
+  "title": "Micro Frontend Module Federation ng-add schematic",
+  "type": "object",
+  "properties": {
+    "project": {
+      "type": "string",
+      "description": "The name of the project.",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "x-prompt": "Project name (press enter for default project)"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "micro",
+        "shell"
+      ],
+      "description": "The type of project.",
+      "default": "micro",
+      "x-prompt": {
+        "message": "What type of application is this project?",
+        "type": "list",
+        "items": [
+          { "value": "micro", "label": "Micro Frontend" },
+          { "value": "shell", "label": "Shell/Container" }
+        ]
+      }
+    },
+    "port": {
+      "type": "string",
+      "description": "The port for the project.",
+      "$default": {
+        "$source": "argv",
+        "index": 1
+      },
+      "x-prompt": "Port to use"
+    },
+    "minimal": {
+      "type": "boolean",
+      "description": "Skip the creation of a micro frontend nav component",
+      "default": false
+    }
+  },
+  "required": [
+    "port"
+  ]
+}
