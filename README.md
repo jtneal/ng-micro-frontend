@@ -126,7 +126,7 @@ const routes: Routes = [{ component: NullComponent, path: '**' }];
 export class AppRoutingModule { }
 ```
 
-2. You need to update your AppModule, changing the bootstrap and adding a DoBootstrap lifecycle hook that creates yoru custom elements:
+2. You need to update your AppModule, changing the bootstrap and adding a DoBootstrap lifecycle hook that creates your custom elements:
 
 ```typescript
 // app.module.ts
@@ -208,10 +208,11 @@ module.exports = {
 };
 ```
 
-5. In order to use this config, you'll need to add ngx-build-plus to your project:
+5. In order to use this config, you'll need to add ngx-build-plus to your project and install dependencies:
 
 ```sh
 ng add ngx-build-plus --project mfe1
+npm install --save-dev webpack-manifest-plugin
 ```
 
 6. Lastly, you'll need to reference this in your angular.json file in multiple locations:
