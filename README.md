@@ -19,17 +19,56 @@ A library for building run-time compilation micro frontends with custom elements
 
 ## Installation
 
-Using npm:
+You can utilize our Angular schematics to install the package and generate an automated, feature complete, micro frontend architecture using Angular Elements in mere seconds.
 
 ```sh
-npm install ng-micro-frontend
+# Create your shell/container
+ng new --routing --strict --style scss shell
+cd shell
+
+# Create your micro frontends
+ng generate application --routing --style scss mfe1
+ng generate application --routing --style scss mfe2
+ng generate application --routing --style scss mfe3
+
+# Add ng-micro-frontend to each project
+ng add ng-micro-frontend --project mfe1 --type micro --port 4210
+ng add ng-micro-frontend --project mfe2 --type micro --port 4220
+ng add ng-micro-frontend --project mfe3 --type micro --port 4230
+ng add ng-micro-frontend --project shell --type shell --port 4200
 ```
 
-Now you can import the `MicroFrontendModule` into your AppModule.
+This will also generate a small micro frontend nav component and add it to your shell's AppComponent HTML. If you don't want this, you can pass in a `--minimal` flag to skip that step.
+
+```sh
+ng add ng-micro-frontend --project shell --type shell --port 4200 --minimal
+```
+
+Once the schematics have completed, you're ready to start everything up.
+
+I recommended starting off by serving up one of your micro frontends to make sure it can run in standalone mode:
+
+```sh
+npm run start:mfe1
+```
+
+Then go to http://localhost:4210 (for example) and make sure it works.
+
+To run your shell and all of your micro frontends at once within a mono repo, just run:
+
+```sh
+npm start
+```
+
+Now when you visit http://localhost:4200 you should see everything working together appropriately.
+
+Also, so far, all of this assumes all of your applications are in the same repo. However, that is not a hard requirement. The automation works best in monorepos, but can certainly be adapted to having separate repos for each application. If you want to see a demo of what this project would look like after running these commands, here's a demo I have created:
+
+https://github.com/jtneal/ng-micro-frontend-demo
 
 ## Getting Started
 
-This package only helps you setup your shell or container application that wraps your micro frontend custom elements. These custom elements can be built using Angular Elements or any other method you prefer.
+If you don't use our schematics, you can still install our package and manually configure your applications. This package works best if your shell and micro frontends are both written in Angular, but you could just as easily adapt your code to support micro frontends written in any framework that supports building custom elements.
 
 Our MicroFrontendComponent will help you route to a custom element using configuration within a manifest.json file. You would serve up your scripts, styles, and manifest from the same location like so:
 
@@ -67,21 +106,147 @@ const routes: Routes = [
 export class AppRoutingModule { }
 ```
 
-**And that's literally it! You now have your first micro frontend up and running.**
+If you need help creating the actual custom elements and manifest.json file, here's what you need to know:
 
-If you want to see an example application, here is the tester we use when developing this library:
+1. You need a catch all route in each micro frontend routing module to resolve routing issues:
 
-https://github.com/jtneal/ng-micro-frontend/tree/main/projects/tester
+```typescript
+// app-routing.module.ts
 
-For simplicity, we serve up our custom elements from the assets folder:
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+import { NullComponent } from 'ng-micro-frontend';
 
-https://github.com/jtneal/ng-micro-frontend/tree/main/projects/tester/src/assets/examples
+const routes: Routes = [{ component: NullComponent, path: '**' }];
 
-Then we setup our router using the MicroFrontendComponent to point to these custom elements:
+@NgModule({
+  imports: [RouterModule.forRoot(routes)],
+  exports: [RouterModule]
+})
+export class AppRoutingModule { }
+```
 
-https://github.com/jtneal/ng-micro-frontend/blob/main/projects/tester/src/app/app-routing.module.ts
+2. You need to update your AppModule, changing the bootstrap and adding a DoBootstrap lifecycle hook that creates yoru custom elements:
 
-If you need help actually creating the custom elements themselves, be on the lookout for a new version coming soon where I will thoroughly document that process as well.
+```typescript
+// app.module.ts
+
+import { NgModule, DoBootstrap, Injector } from '@angular/core';
+import { createCustomElement } from '@angular/elements';
+import { BrowserModule } from '@angular/platform-browser';
+
+import { environment } from '../environments/environment';
+import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
+
+@NgModule({
+  declarations: [
+    AppComponent
+  ],
+  imports: [
+    BrowserModule,
+    AppRoutingModule
+  ],
+  providers: [],
+  bootstrap: environment.production ? [] : [AppComponent]
+})
+export class AppModule implements DoBootstrap {
+  public constructor(private readonly injector: Injector) { }
+
+  public ngDoBootstrap(): void {
+    const customElement = createCustomElement(AppComponent, { injector: this.injector });
+    customElements.define('custom-mfe1', customElement);
+  }
+}
+```
+
+3. You need to update your AppComponent to perform initial navigation for the micro frontend:
+
+```typescript
+// app.component.ts
+
+import { Location } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+
+import { environment } from '../environments/environment';
+
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.scss']
+})
+export class AppComponent implements OnInit {
+  public constructor(
+    private readonly location: Location,
+    private readonly router: Router
+  ) { }
+
+  public ngOnInit(): void {
+    if (environment.production) {
+      this.router.initialNavigation();
+      this.router.navigate([this.location.path()]);
+    }
+  }
+}
+```
+
+4. You'll need a custom webpack config to create the manifest file:
+
+```javascript
+// webpack.config.js
+
+const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
+
+module.exports = {
+  plugins: [
+    new WebpackManifestPlugin({
+      filter: (file) => file.name.endsWith('.js') || file.name.endsWith('.css'),
+      seed: { customElement: 'custom-mfe1' },
+    }),
+  ],
+};
+```
+
+5. In order to use this config, you'll need to add ngx-build-plus to your project:
+
+```sh
+ng add ngx-build-plus --project mfe1
+```
+
+6. Lastly, you'll need to reference this in your angular.json file in multiple locations:
+
+```json
+{
+  "projects": {
+    "mfe1": {
+      "architect": {
+        "build": {
+          "options": {
+            "extraWebpackConfig": "projects/mfe1/webpack.config.js"
+          }
+        },
+        "serve": {
+          "options": {
+            "extraWebpackConfig": "projects/mfe1/webpack.config.js"
+          }
+        },
+        "test": {
+          "options": {
+            "extraWebpackConfig": "projects/mfe1/webpack.config.js"
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+7. Keep in mind, all of this is done for you automatically if you use our schematics, like so:
+
+```sh
+ng add ng-micro-frontend --project mfe1
+```
 
 ## Development
 

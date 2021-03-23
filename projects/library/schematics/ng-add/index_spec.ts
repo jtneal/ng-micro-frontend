@@ -56,8 +56,14 @@ describe('Ng Add Schematic', () => {
   it('should setup micro', async () => {
     const options = { ...defaultOptions, type: 'micro' };
     const tree = await schematicRunner.runSchematicAsync('ng-add', options, appTree).toPromise();
+    const angularConfig = tree.readContent('/angular.json');
 
     expect(tree.files).toContain('/projects/bar/webpack.config.js');
     expect(tree.files).toContain('/projects/bar/webpack.prod.config.js');
+    expect(angularConfig).toContain('"extraWebpackConfig": "projects/bar/webpack.config.js"');
+    expect(angularConfig).toContain('"extraWebpackConfig": "projects/bar/webpack.prod.config.js"');
+    expect(angularConfig).toContain('"builder": "ngx-build-plus:browser"');
+    expect(angularConfig).toContain('"builder": "ngx-build-plus:dev-server"');
+    expect(angularConfig).toContain('"builder": "ngx-build-plus:karma"');
   });
 });

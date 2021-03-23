@@ -1,4 +1,4 @@
-import { chain, externalSchematic, Rule, SchematicsException, Tree } from '@angular-devkit/schematics';
+import { chain, externalSchematic, noop, Rule, SchematicsException, Tree } from '@angular-devkit/schematics';
 import { getWorkspace, updateWorkspace } from '@schematics/angular/utility/workspace';
 import { ProjectType } from '@schematics/angular/utility/workspace-models';
 
@@ -41,6 +41,9 @@ export function ngAdd(options: Schema): Rule {
 
     return chain([
       updateAngularConfig(config, port),
+      // This has to go earlier so we can update the workspace before running external schematics
+      !isShell ? updateMicroAngularConfig(config) : noop(),
+      updateWorkspace(workspace),
       addDependencies(project),
       externalSchematic('@angular/elements', 'ng-add', { project }),
       externalSchematic('ngx-build-plus', 'ng-add', { project }),
@@ -51,13 +54,11 @@ export function ngAdd(options: Schema): Rule {
       ]),
       chainIf(!isShell, [
         addMicroWebpackConfig(config.root, project),
-        updateMicroAngularConfig(config),
         setupCustomElement(sourceRoot, project),
         addMicroDependencies(project),
         addRouteToMicroFrontend(sourceRoot),
         addInitialNavigation(sourceRoot),
       ]),
-      updateWorkspace(workspace),
     ]);
   };
 }
