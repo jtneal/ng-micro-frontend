@@ -4,7 +4,7 @@
   "license": "MIT",
   "repository": {
     "type": "GitHub",
-    "url": "https://github.com/jtneal/ng-module-federation"
+    "url": "https://github.com/jtneal/ng-micro-frontend"
   },
   "author": {
     "name": "Jason Neal",
