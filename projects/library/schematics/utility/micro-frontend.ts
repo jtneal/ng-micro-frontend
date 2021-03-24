@@ -1,7 +1,7 @@
 import { join, normalize, strings } from '@angular-devkit/core';
 import { Rule, SchematicsException, Tree } from '@angular-devkit/schematics';
 import { addImportToModule, addSymbolToNgModuleMetadata, getDecoratorMetadata, getMetadataField, getSourceNodes, insertImport } from '@schematics/angular/utility/ast-utils';
-import { Change, InsertChange, NoopChange } from '@schematics/angular/utility/change';
+import { Change, NoopChange, RemoveChange, } from '@schematics/angular/utility/change';
 import { MODULE_EXT } from '@schematics/angular/utility/find-module';
 import * as ts from 'typescript';
 
@@ -35,11 +35,16 @@ export function setupCustomElement(sourceRoot: string, project: string): Rule {
     const nodes = getSourceNodes(source);
 
     const ngDoBootstrap = `
-    const customElement = createCustomElement(AppComponent, { injector: this.injector });
-    customElements.define('${getCustomElementName(project)}', customElement);
+    if (environment.production) {
+      const customElement = createCustomElement(AppComponent, { injector: this.injector });
+      customElements.define('${getCustomElementName(project)}', customElement);
+    } else {
+      appRef.bootstrap(AppComponent);
+    }
 `;
 
     const changes = [
+      insertImport(source, modulePath, 'ApplicationRef', '@angular/core'),
       insertImport(source, modulePath, 'DoBootstrap', '@angular/core'),
       insertImport(source, modulePath, 'Injector', '@angular/core'),
       insertImport(source, modulePath, 'createCustomElement', '@angular/elements'),
@@ -47,7 +52,7 @@ export function setupCustomElement(sourceRoot: string, project: string): Rule {
       getBootstrapChange(source, modulePath),
       addImplements(nodes, modulePath, 'DoBootstrap'),
       updateConstructor(nodes, modulePath, ['Injector']),
-      updateLifecycleHook(nodes, modulePath, 'ngDoBootstrap', ngDoBootstrap)
+      updateLifecycleHook(nodes, modulePath, 'ngDoBootstrap', ngDoBootstrap, 'appRef: ApplicationRef')
     ];
 
     return handleChanges(host, modulePath, changes);
@@ -56,7 +61,7 @@ export function setupCustomElement(sourceRoot: string, project: string): Rule {
 
 function getBootstrapChange(source: ts.SourceFile, modulePath: string): Change {
   const nodes = getDecoratorMetadata(source, 'NgModule', '@angular/core');
-  let node: any = nodes[0];
+  const node: any = nodes[0];
 
   if (!node) {
     throw new SchematicsException(`Could not find NgModule nodes in ${modulePath}!`);
@@ -65,35 +70,8 @@ function getBootstrapChange(source: ts.SourceFile, modulePath: string): Change {
   const matchingProperties = getMetadataField(node as ts.ObjectLiteralExpression, 'bootstrap');
 
   if (!matchingProperties) {
-    throw new SchematicsException(`Could not bootstrap property in ${modulePath}!`);
+    return new NoopChange();
   }
 
-  const assignment = matchingProperties[0] as ts.PropertyAssignment;
-
-  if (assignment.initializer.kind !== ts.SyntaxKind.ArrayLiteralExpression) {
-    throw new SchematicsException(`Bootstrap property is not an array in ${modulePath}!`);
-  }
-
-  const arrLiteral = assignment.initializer as ts.ArrayLiteralExpression;
-
-  node = arrLiteral.elements.length === 0 ? arrLiteral : arrLiteral.elements;
-
-  if (!node) {
-    throw new SchematicsException(`Bootstrap property is not a valid node in in ${modulePath}!`);
-  }
-
-  const newBootstrap = 'environment.production ? [] : ';
-
-  if (Array.isArray(node)) {
-    const nodeArray = node as {} as Array<ts.Node>;
-    const symbolsArray = nodeArray.map((n) => n.getText());
-
-    if (symbolsArray.includes(newBootstrap)) {
-      return new NoopChange();
-    }
-
-    node = node[node.length - 1];
-  }
-
-  return new InsertChange(modulePath, node.getStart() - 1, newBootstrap);
+  return new RemoveChange(modulePath, matchingProperties[0].getStart() - 2, `  ${matchingProperties[0].getText()}\n`);
 }

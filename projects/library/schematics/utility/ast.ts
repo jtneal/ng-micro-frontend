@@ -150,7 +150,7 @@ export function createConstructor(classPath: string, nodes: ts.Node[], serviceNa
   return new InsertChange(classPath, listNode.pos + 1, toAdd);
 }
 
-export function updateLifecycleHook(nodes: ts.Node[], componentPath: string, hook: string, toAdd: string): Change {
+export function updateLifecycleHook(nodes: ts.Node[], componentPath: string, hook: string, toAdd: string, args = ''): Change {
   const methodNodes = filterNodesByKind(nodes, ts.SyntaxKind.MethodDeclaration);
   const hookIndex = methodNodes.findIndex((m) => m.getText().includes(hook));
   let code: string;
@@ -161,20 +161,24 @@ export function updateLifecycleHook(nodes: ts.Node[], componentPath: string, hoo
       return new NoopChange();
     }
 
+    if (args && !methodNodes[hookIndex].getText().includes(args)) {
+      throw new SchematicsException(`Lifecycle hook ${hook} already exists!`);
+    }
+
     code = `${toAdd}  `;
     position = methodNodes[hookIndex].getEnd() - 1;
   } else {
     if (methodNodes[0]) {
-      code = `public ${hook}(): void {${toAdd}  }\n\n  `;
+      code = `public ${hook}(${args}): void {${toAdd}  }\n\n  `;
       position = methodNodes[0].getStart();
     } else {
       const constructorNode = getNodeByKind(nodes, ts.SyntaxKind.Constructor);
 
       if (constructorNode) {
-        code = `\n\n  public ${hook}(): void {${toAdd}  }`;
+        code = `\n\n  public ${hook}(${args}): void {${toAdd}  }`;
         position = constructorNode.getEnd();
       } else {
-        code = `\n  public ${hook}(): void {${toAdd}  }\n\n`;
+        code = `\n  public ${hook}(${args}): void {${toAdd}  }\n\n`;
         const classNode = getClassNode(nodes);
         let siblings = getSiblings(classNode);
 
