@@ -222,3 +222,16 @@ export function addImplements(nodes: ts.Node[], classPath: string, interfaceName
 
   return new InsertChange(classPath, classIdentifierNode.getEnd() + 1, `implements ${interfaceName} `);
 }
+
+export function insertAfterImports(nodes: ts.Node[], classPath: string, code: string): Change {
+  const imports = filterNodesByKind(nodes, ts.SyntaxKind.ImportDeclaration);
+  const toAdd = `\n\n${code}`;
+
+  if (!imports.length) {
+    return new InsertChange(classPath, 0, toAdd);
+  }
+
+  const last = imports[imports.length - 1];
+
+  return new InsertChange(classPath, last.getEnd(), toAdd);
+}

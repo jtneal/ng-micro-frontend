@@ -56,7 +56,7 @@ export function ngAdd(options: Schema): Rule {
         addMicroWebpackConfig(config.root, project),
         setupCustomElement(sourceRoot, project),
         addMicroDependencies(project),
-        addRouteToMicroFrontend(sourceRoot),
+        addRouteToMicroFrontend(sourceRoot, project),
         addInitialNavigation(sourceRoot),
       ]),
     ]);

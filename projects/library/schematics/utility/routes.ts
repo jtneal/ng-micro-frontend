@@ -1,20 +1,24 @@
-import { join, normalize } from '@angular-devkit/core';
+import { join, normalize, strings } from '@angular-devkit/core';
 import { Rule, Tree } from '@angular-devkit/schematics';
 import { addRouteDeclarationToModule, getSourceNodes, insertImport } from '@schematics/angular/utility/ast-utils';
 import { InsertChange } from '@schematics/angular/utility/change';
 import { ROUTING_MODULE_EXT } from '@schematics/angular/utility/find-module';
-import { Application } from './applications';
 
-import { addImplements, getSource, updateConstructor, updateLifecycleHook } from './ast';
+import { Application } from './applications';
+import { addImplements, getSource, insertAfterImports, updateConstructor, updateLifecycleHook } from './ast';
 import { handleChanges } from './changes';
 
-export function addRouteToMicroFrontend(sourceRoot: string): Rule {
+export function addRouteToMicroFrontend(sourceRoot: string, project: string): Rule {
   return (host: Tree): Tree => {
     const modulePath = join(normalize(sourceRoot), normalize(`app/app${ROUTING_MODULE_EXT}`));
     const source = getSource(host, modulePath);
+    const nodes = getSourceNodes(source);
+    const routes = `{ children: mfeRoutes, path: '${strings.dasherize(project)}' },
+  { component: NullComponent, path: '**' }`;
     const changes = [
       insertImport(source, modulePath, 'NullComponent', 'ng-micro-frontend'),
-      addRouteDeclarationToModule(source, modulePath, `{ component: NullComponent, path: '**' }`) as InsertChange,
+      insertAfterImports(nodes, modulePath, `const mfeRoutes: Routes = [];`),
+      addRouteDeclarationToModule(source, modulePath, routes) as InsertChange,
     ];
 
     return handleChanges(host, modulePath, changes);
