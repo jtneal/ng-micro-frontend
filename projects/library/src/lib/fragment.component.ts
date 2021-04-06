@@ -5,10 +5,10 @@ import { Manifest } from './manifest';
 import { MicroFrontendService } from './micro-frontend.service';
 
 @Component({
-  selector: 'lib-micro',
+  selector: 'mfe-fragment',
   template: '<ng-container *ngIf="manifest$ | async as manifest"></ng-container>',
 })
-export class MicroComponent implements OnInit {
+export class FragmentComponent implements OnInit {
   @Input()
   public baseUrl: string;
 

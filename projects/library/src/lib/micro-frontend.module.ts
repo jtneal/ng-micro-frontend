@@ -3,17 +3,17 @@ import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 
 import { MicroFrontendComponent } from './micro-frontend.component';
-import { MicroComponent } from './micro.component';
+import { FragmentComponent } from './fragment.component';
 import { NullComponent } from './null.component';
 
 @NgModule({
   declarations: [
-    MicroComponent,
+    FragmentComponent,
     MicroFrontendComponent,
     NullComponent,
   ],
   exports: [
-    MicroComponent,
+    FragmentComponent,
     MicroFrontendComponent,
     NullComponent,
   ],

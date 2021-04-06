@@ -7,7 +7,7 @@ import { Manifest } from './manifest';
 import { MicroFrontendService } from './micro-frontend.service';
 
 @Component({
-  selector: 'lib-micro-frontend',
+  selector: 'mfe-micro-frontend',
   template: '<ng-container *ngIf="manifest$ | async as manifest"></ng-container>',
 })
 export class MicroFrontendComponent implements OnInit {

@@ -7,7 +7,7 @@
       "projectType": "library",
       "root": "projects/library",
       "sourceRoot": "projects/library/src",
-      "prefix": "lib",
+      "prefix": "mfe",
       "architect": {
         "build": {
           "builder": "@angular-devkit/build-angular:ng-packagr",
