@@ -1,0 +1,4 @@
+{
+  "customElement": "my-list",
+  "main.js": "my-list.js"
+}

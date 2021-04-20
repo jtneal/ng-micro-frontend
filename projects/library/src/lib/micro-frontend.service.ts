@@ -19,9 +19,7 @@ export class MicroFrontendService {
     if (this.loaded.hasOwnProperty(baseUrl)) {
       const manifest = this.loaded[baseUrl];
 
-      if (!this.customElementExists(manifest)) {
-        this.loadCustomElement(manifest, target);
-      }
+      this.loadCustomElement(manifest, target);
 
       return of(manifest);
     }
@@ -29,12 +27,18 @@ export class MicroFrontendService {
     return this.getManifest(baseUrl).pipe(
       tap((manifest) => {
         if (!this.customElementExists(manifest)) {
-          this.loadStyle(`${baseUrl}/${manifest['styles.css']}`);
-          this.loadScript(`${baseUrl}/${manifest['polyfills.js']}`);
+          if (manifest['styles.css']) {
+            this.loadStyle(`${baseUrl}/${manifest['styles.css']}`);
+          }
+
+          if (manifest['polyfills.js']) {
+            this.loadScript(`${baseUrl}/${manifest['polyfills.js']}`);
+          }
+
           this.loadScript(`${baseUrl}/${manifest['main.js']}`);
-          this.loadCustomElement(manifest, target);
         }
 
+        this.loadCustomElement(manifest, target);
         this.loaded[baseUrl] = manifest;
       }),
     );
