@@ -49,10 +49,12 @@ export function setupCustomElement(sourceRoot: string, project: string): Rule {
       insertImport(source, modulePath, 'Injector', '@angular/core'),
       insertImport(source, modulePath, 'createCustomElement', '@angular/elements'),
       insertImport(source, modulePath, 'environment', '../environments/environment'),
+      ...addImportToModule(source, modulePath, 'MicroFrontendModule', 'ng-micro-frontend'),
+      ...addSymbolToNgModuleMetadata(source, modulePath, 'schemas', 'CUSTOM_ELEMENTS_SCHEMA', '@angular/core'),
       getBootstrapChange(source, modulePath),
       addImplements(nodes, modulePath, 'DoBootstrap'),
       updateConstructor(nodes, modulePath, ['Injector']),
-      updateLifecycleHook(nodes, modulePath, 'ngDoBootstrap', ngDoBootstrap, 'appRef: ApplicationRef')
+      updateLifecycleHook(nodes, modulePath, 'ngDoBootstrap', ngDoBootstrap, 'appRef: ApplicationRef'),
     ];
 
     return handleChanges(host, modulePath, changes);

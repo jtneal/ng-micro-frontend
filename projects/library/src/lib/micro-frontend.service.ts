@@ -19,20 +19,29 @@ export class MicroFrontendService {
     if (this.loaded.hasOwnProperty(baseUrl)) {
       const manifest = this.loaded[baseUrl];
 
-      this.loadCustomElement(manifest, target);
+      if (!this.customElementExists(manifest)) {
+        this.loadCustomElement(manifest, target);
+      }
 
       return of(manifest);
     }
 
     return this.getManifest(baseUrl).pipe(
       tap((manifest) => {
-        this.loadStyle(`${baseUrl}/${manifest['styles.css']}`);
-        this.loadScript(`${baseUrl}/${manifest['polyfills.js']}`);
-        this.loadScript(`${baseUrl}/${manifest['main.js']}`);
-        this.loadCustomElement(manifest, target);
+        if (!this.customElementExists(manifest)) {
+          this.loadStyle(`${baseUrl}/${manifest['styles.css']}`);
+          this.loadScript(`${baseUrl}/${manifest['polyfills.js']}`);
+          this.loadScript(`${baseUrl}/${manifest['main.js']}`);
+          this.loadCustomElement(manifest, target);
+        }
+
         this.loaded[baseUrl] = manifest;
       }),
     );
+  }
+
+  private customElementExists(manifest: Manifest): boolean {
+    return !!customElements.get(manifest.customElement);
   }
 
   private getManifest(baseUrl: string): Observable<Manifest> {
