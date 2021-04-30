@@ -1,5 +1,5 @@
 import { join, normalize, strings } from '@angular-devkit/core';
-import { Rule, Tree } from '@angular-devkit/schematics';
+import { Rule, SchematicContext, Tree } from '@angular-devkit/schematics';
 import { addRouteDeclarationToModule, getSourceNodes, insertImport } from '@schematics/angular/utility/ast-utils';
 import { InsertChange } from '@schematics/angular/utility/change';
 import { ROUTING_MODULE_EXT } from '@schematics/angular/utility/find-module';
@@ -9,8 +9,16 @@ import { addImplements, getSource, insertAfterImports, updateConstructor, update
 import { handleChanges } from './changes';
 
 export function addRouteToMicroFrontend(sourceRoot: string, project: string): Rule {
-  return (host: Tree): Tree => {
+  return (host: Tree, context: SchematicContext): Tree => {
     const modulePath = join(normalize(sourceRoot), normalize(`app/app${ROUTING_MODULE_EXT}`));
+
+    if (!host.exists(modulePath)) {
+      context.logger.warn(`Could not find routing module: app${ROUTING_MODULE_EXT}`);
+      context.logger.warn('You will have to manually add the necessary routes');
+
+      return host;
+    }
+
     const source = getSource(host, modulePath);
     const nodes = getSourceNodes(source);
     const routes = `{ children: mfeRoutes, path: '${strings.dasherize(project)}' },
@@ -53,8 +61,16 @@ export function addInitialNavigation(sourceRoot: string): Rule {
 }
 
 export function addRoutesToShell(applications: Application[], sourceRoot: string): Rule {
-  return (host: Tree): Tree => {
+  return (host: Tree, context: SchematicContext): Tree => {
     const modulePath = join(normalize(sourceRoot), normalize(`app/app${ROUTING_MODULE_EXT}`));
+
+    if (!host.exists(modulePath)) {
+      context.logger.warn(`Could not find routing module: app${ROUTING_MODULE_EXT}`);
+      context.logger.warn('You will have to manually add the necessary routes');
+
+      return host;
+    }
+
     const source = getSource(host, modulePath);
     const last = applications[applications.length - 1];
     const getEnd = (a: Application) => a === last ? '\n' : '';
